@@ -1,0 +1,403 @@
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++old Trigger+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+public class UpdateSalesContractsHelper {
+    
+    public static void updateNewContact(map <id,pba__Offer__c> newmapofr, map <id,pba__Offer__c> oldmapofr,list <pba__Offer__c> ofrlist){
+        try{                    
+            system.debug('inside updateNewContact>>>>>>>>>>>>>>>>>>>>>>>');
+            //list <pba__Offer__c> pbaoffrlist = new list <pba__Offer__c>();
+            //list <pba__Offer__c> newpbaoffrlist = new list <pba__Offer__c>();
+            list<String> emailList=new list<String>();
+            string contact_first_name = '';
+            String template_name='';
+            EmailTemplate theTemplate= new EmailTemplate();
+            string contactId = '';
+            Set<string> conIds = new Set<string>();
+            
+            Map<id,pba__Offer__c> mm =new Map<Id,pba__Offer__c>([select pba__Contact__r.FirstName,pba__Contact__r.Email,Secondary_Buyer__r.FirstName,Secondary_Buyer__r.Email,
+                                                                 Development__r.Name,Buyer_7__r.Email,Buyer_7__r.FirstName,Buyer_3__r.FirstName,Buyer_3__r.Email,Buyer_4__r.FirstName,
+                                                                 Buyer_4__r.Email,Buyer_5__r.FirstName,Buyer_5__r.Email,Buyer_6__r.FirstName,Buyer_6__r.Email from pba__Offer__c where Id IN:ofrlist]);
+            
+            list<pba__Offer__c> offerList = [select id,Contract_Status__c,Email_Salutation1__c,Sent_Email_to_Buyer_1__c,
+                                             Sent_Email_to_Buyer_2__c,Sent_Email__c,Sent_Email_to_Buyer_4__c,
+                                             Sent_Email_to_Buyer_5__c,Sent_Email_to_Buyer_6__c,Sent_Email_to_Buyer_7__c from pba__Offer__c where id in:ofrlist];
+            
+            list<pba__Offer__c> salesOfferlistUpdate = new list<pba__Offer__c>();
+            
+            for(pba__Offer__c objpba : offerList){
+                //set templte balnk
+                template_name='';
+                
+                if (objpba.Contract_Status__c == 'Settled'){    
+                    if(newmapofr.get(objpba.id).pba__Contact__c==oldmapofr.get(objpba.id).pba__Contact__c 
+                       && objpba.Sent_Email_to_Buyer_1__c == false) {
+                           objpba.Sent_Email_to_Buyer_1__c = true;
+                           contactId= newmapofr.get(objpba.id).pba__Contact__c;
+                           contact_first_name +=mm.get(objpba.id).pba__Contact__r.FirstName+ ' ,';
+                           system.debug('>>>>>>>>>>>>>>>>>>>j>>>>>'+mm.get(objpba.id).pba__Contact__r.FirstName);
+                           system.debug('newmapofr.get(objpba.id).pba__Contact__c>>>>>>>>>>>>>'+newmapofr.get(objpba.id).pba__Contact__c);
+                           conIds.add(newmapofr.get(objpba.id).pba__Contact__c);
+                           if(mm.get(objpba.Id).pba__Contact__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).pba__Contact__r.Email); 
+                           }
+                       }
+                    
+                    if(newmapofr.get(objpba.id).pba__Contact__c!=oldmapofr.get(objpba.id).pba__Contact__c &&
+                       newmapofr.get(objpba.id).pba__Contact__c!=null /*&& objpba.Sent_Email_to_Buyer_1__c == false*/) {
+                           objpba.Sent_Email_to_Buyer_1__c = true;
+                           contactId= newmapofr.get(objpba.id).pba__Contact__c;
+                           contact_first_name +=mm.get(objpba.id).pba__Contact__r.FirstName+ ' ,';
+                           system.debug('>>>>>>>>>>>>>>>>>>>j>>>>>'+mm.get(objpba.id).pba__Contact__r.FirstName);
+                           system.debug('newmapofr.get(objpba.id).pba__Contact__c>>>>>>>>>>>>>'+newmapofr.get(objpba.id).pba__Contact__c);
+                           conIds.add(newmapofr.get(objpba.id).pba__Contact__c);
+                           if(mm.get(objpba.Id).pba__Contact__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).pba__Contact__r.Email); 
+                           }
+                       }
+                    if(newmapofr.get(objpba.id).Secondary_Buyer__c!=oldmapofr.get(objpba.id).Secondary_Buyer__c
+                       && newmapofr.get(objpba.id).Secondary_Buyer__c!=null /*&& objpba.Sent_Email_to_Buyer_2__c == false */) {
+                           objpba.Sent_Email_to_Buyer_2__c = true;
+                           contactId= newmapofr.get(objpba.id).Secondary_Buyer__c;
+                           contact_first_name +=mm.get(objpba.id).Secondary_Buyer__r.FirstName+ ' ,';
+                           system.debug('newmapofr.get(objpba.id).pba__Contact__c>>>>>>>>>>>>>'+newmapofr.get(objpba.id).pba__Contact__c);
+                           conIds.add(newmapofr.get(objpba.id).Secondary_Buyer__c);
+                           if(mm.get(objpba.Id).Secondary_Buyer__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).Secondary_Buyer__r.Email); 
+                           }
+                           
+                       }
+                    if(newmapofr.get(objpba.id).Buyer_3__c!=oldmapofr.get(objpba.id).Buyer_3__c
+                       && newmapofr.get(objpba.id).Buyer_3__c!=null /*&& objpba.Sent_Email__c == false */) {
+                           objpba.Sent_Email__c = True;
+                           contactId= newmapofr.get(objpba.id).Buyer_3__c;
+                           contact_first_name +=mm.get(objpba.id).Buyer_3__r.FirstName+ ' ,';
+                           conIds.add(newmapofr.get(objpba.id).Buyer_3__c);
+                           if(mm.get(objpba.Id).Buyer_3__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).Buyer_3__r.Email); 
+                           }
+                       }
+                    if(newmapofr.get(objpba.id).Buyer_4__c!=oldmapofr.get(objpba.id).Buyer_4__c
+                       && newmapofr.get(objpba.id).Buyer_4__c!=null /*&& objpba.Sent_Email_to_Buyer_4__c == false*/ ) {
+                           objpba.Sent_Email_to_Buyer_4__c = True;
+                           contactId= newmapofr.get(objpba.id).Buyer_4__c;
+                           contact_first_name +=mm.get(objpba.id).Buyer_4__r.FirstName+ ' ,';
+                           conIds.add(newmapofr.get(objpba.id).Buyer_4__c);
+                           if(mm.get(objpba.Id).Buyer_4__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).Buyer_4__r.Email); 
+                           } 
+                       }
+                    if(newmapofr.get(objpba.id).Buyer_5__c!=oldmapofr.get(objpba.id).Buyer_5__c
+                       && newmapofr.get(objpba.id).Buyer_5__c!=null /*&& objpba.Sent_Email_to_Buyer_5__c == false*/) {   
+                           objpba.Sent_Email_to_Buyer_5__c = True;
+                           contactId= newmapofr.get(objpba.id).Buyer_5__c;
+                           contact_first_name +=mm.get(objpba.id).Buyer_5__r.FirstName+ ' ,';
+                           conIds.add(newmapofr.get(objpba.id).Buyer_5__c);
+                           if(mm.get(objpba.Id).Buyer_5__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).Buyer_5__r.Email); 
+                           } 
+                       }
+                    if(newmapofr.get(objpba.id).Buyer_6__c!=oldmapofr.get(objpba.id).Buyer_6__c
+                       && newmapofr.get(objpba.id).Buyer_6__c!=null /*&& objpba.Sent_Email_to_Buyer_6__c == false*/) {
+                           objpba.Sent_Email_to_Buyer_6__c = True;
+                           contactId= newmapofr.get(objpba.id).Buyer_6__c;
+                           contact_first_name +=mm.get(objpba.id).Buyer_6__r.FirstName+ ' ,';
+                           conIds.add(newmapofr.get(objpba.id).Buyer_6__c);
+                           if(mm.get(objpba.Id).Buyer_6__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).Buyer_6__r.Email); 
+                           } 
+                       }
+                    if(newmapofr.get(objpba.id).Buyer_7__c!=oldmapofr.get(objpba.id).Buyer_7__c
+                       && newmapofr.get(objpba.id).Buyer_7__c!=null /*&& objpba.Sent_Email_to_Buyer_7__c == false*/) {
+                           objpba.Sent_Email_to_Buyer_7__c = True;
+                           contactId= newmapofr.get(objpba.id).Buyer_7__c;
+                           contact_first_name +=mm.get(objpba.id).Buyer_7__r.FirstName+ ' ,';
+                           conIds.add(newmapofr.get(objpba.id).Buyer_7__c);
+                           if(mm.get(objpba.Id).Buyer_7__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).Buyer_7__r.Email); 
+                           } 
+                       }
+                    if(contact_first_name!=null){
+                        string AllFirstName = contact_first_name.removeEnd(',');
+                        list<string> AllFirstNameList = AllFirstName.split(',');
+                        contact_first_name ='';
+                        integer i=1;
+                        for(string fname:AllFirstNameList){
+                            if(i==AllFirstNameList.size()-1){
+                                contact_first_name +=fname +'& ';
+                            }else{
+                                contact_first_name +=fname + ',';
+                            }
+                            i++;
+                        }
+                        objpba.Email_Salutation1__c=contact_first_name.removeEnd(',');
+                        salesOfferlistUpdate.add(objpba);
+                    }
+                    
+                    system.debug(' objpba.Email_Salutation1__c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>'+objpba.Email_Salutation1__c);
+                    
+                    //**********get template name 
+                    if(mm.get(objpba.id).Development__r.Name.containsIgnoreCase('Marina Concourse') 
+                       && mm.get(objpba.id).Development__r.Name!=null){
+                           template_name='Marina Concourse Settlement Email';
+                       }
+                    if(mm.get(objpba.id).Development__r.Name.containsIgnoreCase('Shea Residences Concourse') 
+                       && mm.get(objpba.id).Development__r.Name!=null){
+                           template_name='Shea Residences Settlement Email';
+                       }
+                    if(mm.get(objpba.id).Development__r.Name.containsIgnoreCase('Arbour Residences')
+                       && mm.get(objpba.id).Development__r.Name!=null){
+                           template_name= 'Shea Residences Settlement Email';
+                       }
+                    if(mm.get(objpba.id).Development__r.Name.containsIgnoreCase('The Gardens Concourse')
+                       && mm.get(objpba.id).Development__r.Name!=null){
+                           template_name= 'Shea Residences Settlement Email';
+                       }
+                }
+            }
+            
+            if(salesOfferlistUpdate.size()>0){
+                update salesOfferlistUpdate; 
+            }
+            
+            if(template_name!=''){
+                theTemplate = [SELECT Id,Body,htmlValue,subject FROM EmailTemplate WHERE name =:template_name limit 1];
+                System.debug('theTemplate>>>>>>>>>'+theTemplate);  
+            }
+            
+            // Mail send class--> 
+            system.debug('contactId  >>>>>>>>>>>>>>>>>>>>'+contactId); 
+            system.debug('conIds>>>>>>>>>>>>>>'+conIds);
+            system.debug('emailList>>>>>>>>>>>>>>'+emailList);
+            
+            String bodyContent=theTemplate.htmlValue;
+            
+            if(bodyContent != null){
+                bodyContent = bodyContent.replaceAll('AllFirstName', salesOfferlistUpdate[0].Email_Salutation1__c);
+            }
+            string Body1=bodyContent;
+            
+            List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
+            Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+            mail.setSaveAsActivity(false);
+            //mail.setTemplateId(theTemplate);
+            mail.setTargetObjectId(contactId);
+            mail.setHtmlBody(Body1);
+            mail.setSubject(theTemplate.subject);
+            mail.setToAddresses(emailList);  //add other emails here.
+            mail.setTreatTargetObjectAsRecipient(false);
+            emails.add(mail);
+            Messaging.sendEmail(emails); 
+            
+        }
+        catch(Exception e){
+            system.debug('Error>>>>>>>'+e.getMessage() +'At line number>>>>>>>'+e.getLineNumber());
+        }
+    }
+}
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++New Trigger bulkify+++++++++++++++++++++++++++++++++
+
+
+
+public class UpdateSalesContractsHelper {
+    
+    public static void updateNewContact(map <id,pba__Offer__c> newmapofr, map <id,pba__Offer__c> oldmapofr,list <pba__Offer__c> ofrlist){
+        try{                    
+            system.debug('inside updateNewContact>>>>>>>>>>>>>>>>>>>>>>>');
+            //list <pba__Offer__c> pbaoffrlist = new list <pba__Offer__c>();
+            //list <pba__Offer__c> newpbaoffrlist = new list <pba__Offer__c>();
+            list <string> templatenamelist = new list <string>();
+            list<String> emailList=new list<String>();
+            string contact_first_name = '';
+            String template_name='';
+            EmailTemplate theTemplate= new EmailTemplate();
+            string contactId = '';
+            Set<string> conIds = new Set<string>();
+            
+            Map<id,pba__Offer__c> mm =new Map<Id,pba__Offer__c>([select pba__Contact__r.FirstName,pba__Contact__r.Email,Secondary_Buyer__r.FirstName,Secondary_Buyer__r.Email,
+                                                                 Development__r.Name,Buyer_7__r.Email,Buyer_7__r.FirstName,Buyer_3__r.FirstName,Buyer_3__r.Email,Buyer_4__r.FirstName,
+                                                                 Buyer_4__r.Email,Buyer_5__r.FirstName,Buyer_5__r.Email,Buyer_6__r.FirstName,Buyer_6__r.Email from pba__Offer__c where Id IN:ofrlist]);
+            
+            list<pba__Offer__c> offerList = [select id,Contract_Status__c,Email_Salutation1__c,Sent_Email_to_Buyer_1__c,
+                                             Sent_Email_to_Buyer_2__c,Sent_Email__c,Sent_Email_to_Buyer_4__c,
+                                             Sent_Email_to_Buyer_5__c,Sent_Email_to_Buyer_6__c,Sent_Email_to_Buyer_7__c from pba__Offer__c where id in:ofrlist];
+            
+            list<pba__Offer__c> salesOfferlistUpdate = new list<pba__Offer__c>();
+            
+            for(pba__Offer__c objpba : offerList){
+                //set templte balnk
+                template_name='';
+                
+                if (objpba.Contract_Status__c == 'Settled'){    
+                    if(newmapofr.get(objpba.id).pba__Contact__c==oldmapofr.get(objpba.id).pba__Contact__c 
+                       && objpba.Sent_Email_to_Buyer_1__c == false) {
+                           objpba.Sent_Email_to_Buyer_1__c = true;
+                           contactId= newmapofr.get(objpba.id).pba__Contact__c;
+                           contact_first_name +=mm.get(objpba.id).pba__Contact__r.FirstName+ ' ,';
+                           system.debug('>>>>>>>>>>>>>>>>>>>j>>>>>'+mm.get(objpba.id).pba__Contact__r.FirstName);
+                           system.debug('newmapofr.get(objpba.id).pba__Contact__c>>>>>>>>>>>>>'+newmapofr.get(objpba.id).pba__Contact__c);
+                           conIds.add(newmapofr.get(objpba.id).pba__Contact__c);
+                           if(mm.get(objpba.Id).pba__Contact__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).pba__Contact__r.Email); 
+                           }
+                       }
+                    
+                    if(newmapofr.get(objpba.id).pba__Contact__c!=oldmapofr.get(objpba.id).pba__Contact__c &&
+                       newmapofr.get(objpba.id).pba__Contact__c!=null /*&& objpba.Sent_Email_to_Buyer_1__c == false*/) {
+                           objpba.Sent_Email_to_Buyer_1__c = true;
+                           contactId= newmapofr.get(objpba.id).pba__Contact__c;
+                           contact_first_name +=mm.get(objpba.id).pba__Contact__r.FirstName+ ' ,';
+                           system.debug('>>>>>>>>>>>>>>>>>>>j>>>>>'+mm.get(objpba.id).pba__Contact__r.FirstName);
+                           system.debug('newmapofr.get(objpba.id).pba__Contact__c>>>>>>>>>>>>>'+newmapofr.get(objpba.id).pba__Contact__c);
+                           conIds.add(newmapofr.get(objpba.id).pba__Contact__c);
+                           if(mm.get(objpba.Id).pba__Contact__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).pba__Contact__r.Email); 
+                           }
+                       }
+                    if(newmapofr.get(objpba.id).Secondary_Buyer__c!=oldmapofr.get(objpba.id).Secondary_Buyer__c
+                       && newmapofr.get(objpba.id).Secondary_Buyer__c!=null /*&& objpba.Sent_Email_to_Buyer_2__c == false */) {
+                           objpba.Sent_Email_to_Buyer_2__c = true;
+                           contactId= newmapofr.get(objpba.id).Secondary_Buyer__c;
+                           contact_first_name +=mm.get(objpba.id).Secondary_Buyer__r.FirstName+ ' ,';
+                           system.debug('newmapofr.get(objpba.id).pba__Contact__c>>>>>>>>>>>>>'+newmapofr.get(objpba.id).pba__Contact__c);
+                           conIds.add(newmapofr.get(objpba.id).Secondary_Buyer__c);
+                           if(mm.get(objpba.Id).Secondary_Buyer__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).Secondary_Buyer__r.Email); 
+                           }
+                           
+                       }
+                    if(newmapofr.get(objpba.id).Buyer_3__c!=oldmapofr.get(objpba.id).Buyer_3__c
+                       && newmapofr.get(objpba.id).Buyer_3__c!=null /*&& objpba.Sent_Email__c == false */) {
+                           objpba.Sent_Email__c = True;
+                           contactId= newmapofr.get(objpba.id).Buyer_3__c;
+                           contact_first_name +=mm.get(objpba.id).Buyer_3__r.FirstName+ ' ,';
+                           conIds.add(newmapofr.get(objpba.id).Buyer_3__c);
+                           if(mm.get(objpba.Id).Buyer_3__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).Buyer_3__r.Email); 
+                           }
+                       }
+                    if(newmapofr.get(objpba.id).Buyer_4__c!=oldmapofr.get(objpba.id).Buyer_4__c
+                       && newmapofr.get(objpba.id).Buyer_4__c!=null /*&& objpba.Sent_Email_to_Buyer_4__c == false*/ ) {
+                           objpba.Sent_Email_to_Buyer_4__c = True;
+                           contactId= newmapofr.get(objpba.id).Buyer_4__c;
+                           contact_first_name +=mm.get(objpba.id).Buyer_4__r.FirstName+ ' ,';
+                           conIds.add(newmapofr.get(objpba.id).Buyer_4__c);
+                           if(mm.get(objpba.Id).Buyer_4__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).Buyer_4__r.Email); 
+                           } 
+                       }
+                    if(newmapofr.get(objpba.id).Buyer_5__c!=oldmapofr.get(objpba.id).Buyer_5__c
+                       && newmapofr.get(objpba.id).Buyer_5__c!=null /*&& objpba.Sent_Email_to_Buyer_5__c == false*/) {   
+                           objpba.Sent_Email_to_Buyer_5__c = True;
+                           contactId= newmapofr.get(objpba.id).Buyer_5__c;
+                           contact_first_name +=mm.get(objpba.id).Buyer_5__r.FirstName+ ' ,';
+                           conIds.add(newmapofr.get(objpba.id).Buyer_5__c);
+                           if(mm.get(objpba.Id).Buyer_5__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).Buyer_5__r.Email); 
+                           } 
+                       }
+                    if(newmapofr.get(objpba.id).Buyer_6__c!=oldmapofr.get(objpba.id).Buyer_6__c
+                       && newmapofr.get(objpba.id).Buyer_6__c!=null /*&& objpba.Sent_Email_to_Buyer_6__c == false*/) {
+                           objpba.Sent_Email_to_Buyer_6__c = True;
+                           contactId= newmapofr.get(objpba.id).Buyer_6__c;
+                           contact_first_name +=mm.get(objpba.id).Buyer_6__r.FirstName+ ' ,';
+                           conIds.add(newmapofr.get(objpba.id).Buyer_6__c);
+                           if(mm.get(objpba.Id).Buyer_6__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).Buyer_6__r.Email); 
+                           } 
+                       }
+                    if(newmapofr.get(objpba.id).Buyer_7__c!=oldmapofr.get(objpba.id).Buyer_7__c
+                       && newmapofr.get(objpba.id).Buyer_7__c!=null /*&& objpba.Sent_Email_to_Buyer_7__c == false*/) {
+                           objpba.Sent_Email_to_Buyer_7__c = True;
+                           contactId= newmapofr.get(objpba.id).Buyer_7__c;
+                           contact_first_name +=mm.get(objpba.id).Buyer_7__r.FirstName+ ' ,';
+                           conIds.add(newmapofr.get(objpba.id).Buyer_7__c);
+                           if(mm.get(objpba.Id).Buyer_7__r.Email != null){
+                               emailList.add(mm.get(objpba.Id).Buyer_7__r.Email); 
+                           } 
+                       }
+                    if(contact_first_name!=null){
+                        string AllFirstName = contact_first_name.removeEnd(',');
+                        list<string> AllFirstNameList = AllFirstName.split(',');
+                        contact_first_name ='';
+                        integer i=1;
+                        for(string fname:AllFirstNameList){
+                            if(i==AllFirstNameList.size()-1){
+                                contact_first_name +=fname +'& ';
+                            }else{
+                                contact_first_name +=fname + ',';
+                            }
+                            i++;
+                        }
+                        objpba.Email_Salutation1__c=contact_first_name.removeEnd(',');
+                        salesOfferlistUpdate.add(objpba);
+                    }
+                    
+                    system.debug(' objpba.Email_Salutation1__c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>'+objpba.Email_Salutation1__c);
+                    
+                    //**********get template name 
+                    if(mm.get(objpba.id).Development__r.Name.containsIgnoreCase('Marina Concourse') 
+                       && mm.get(objpba.id).Development__r.Name!=null){
+                           template_name='Marina Concourse Settlement Email';
+                           templatenamelist.add(template_name);
+                       }
+                    if(mm.get(objpba.id).Development__r.Name.containsIgnoreCase('Shea Residences Concourse') 
+                       && mm.get(objpba.id).Development__r.Name!=null){
+                           template_name='Shea Residences Settlement Email';
+                           templatenamelist.add(template_name);
+                       }
+                    if(mm.get(objpba.id).Development__r.Name.containsIgnoreCase('Arbour Residences')
+                       && mm.get(objpba.id).Development__r.Name!=null){
+                           template_name= 'Shea Residences Settlement Email';
+                           templatenamelist.add(template_name);
+                       }
+                    if(mm.get(objpba.id).Development__r.Name.containsIgnoreCase('The Gardens Concourse')
+                       && mm.get(objpba.id).Development__r.Name!=null){
+                           template_name= 'Shea Residences Settlement Email';
+                           templatenamelist.add(template_name);
+                       }
+                }
+            }
+            
+            if(salesOfferlistUpdate.size()>0){
+                update salesOfferlistUpdate; 
+            }
+            
+            if(templatenamelist.size()>0){
+                for(integer i=0;i<=templatenamelist.size();i++){
+                    theTemplate = [SELECT Id,Body,htmlValue,subject FROM EmailTemplate WHERE name =:templatenamelist[i] limit 1];
+                    System.debug('theTemplate>>>>>>>>>'+theTemplate);  
+                    
+                    
+                    // Mail send class--> 
+                    system.debug('contactId  >>>>>>>>>>>>>>>>>>>>'+contactId); 
+                    system.debug('conIds>>>>>>>>>>>>>>'+conIds);
+                    system.debug('emailList>>>>>>>>>>>>>>'+emailList);
+                    
+                    String bodyContent=theTemplate.htmlValue;
+                    
+                    if(bodyContent != null){
+                        bodyContent = bodyContent.replaceAll('AllFirstName', salesOfferlistUpdate[0].Email_Salutation1__c);
+                    }
+                    string Body1=bodyContent;
+                    
+                    List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
+                    Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+                    mail.setSaveAsActivity(false);
+                    //mail.setTemplateId(theTemplate);
+                    mail.setTargetObjectId(contactId);
+                    mail.setHtmlBody(Body1);
+                    mail.setSubject(theTemplate.subject);
+                    mail.setToAddresses(emailList);  //add other emails here.
+                    mail.setTreatTargetObjectAsRecipient(false);
+                    emails.add(mail);
+                    Messaging.sendEmail(emails); 
+                } 
+            }
+        }
+        catch(Exception e){
+            system.debug('Error>>>>>>>'+e.getMessage() +'At line number>>>>>>>'+e.getLineNumber());
+        }
+    }
+}
