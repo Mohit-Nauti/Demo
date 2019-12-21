@@ -1,7 +1,7 @@
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++old Trigger+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 public class UpdateSalesContractsHelper {
-    
+    ghghjghjgh
     public static void updateNewContact(map <id,pba__Offer__c> newmapofr, map <id,pba__Offer__c> oldmapofr,list <pba__Offer__c> ofrlist){
         try{                    
             system.debug('inside updateNewContact>>>>>>>>>>>>>>>>>>>>>>>');
